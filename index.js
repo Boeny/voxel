@@ -1,5 +1,11 @@
 const canvas = document.getElementById('voxelCanvas');
-const gl = canvas.getContext('webgl');
+const gl = canvas.getContext('webgl2');
+
+if (!gl) {
+    console.error('WebGL 2.0 not available');
+    alert('WebGL 2.0 is not supported by your browser!');
+    throw new Error('WebGL 2.0 not supported');
+}
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;

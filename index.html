@@ -11,28 +11,31 @@
 </head>
 <body>
     <canvas id="voxelCanvas"></canvas>
-    <script id="vertexShader" type="x-shader/x-vertex">
-        attribute vec3 position;
+    <script id="vertexShader" type="x-shader/x-vertex">#version 300 es
+        in vec3 position;
         void main() {
             gl_Position = vec4(position, 1.0);
         }
     </script>
 
-    <script id="fragmentShader" type="x-shader/x-fragment">
-        precision mediump float;
+    <script id="fragmentShader" type="x-shader/x-fragment">#version 300 es
+        precision mediump float; // Указываем точность для float
+        precision mediump sampler3D;  // Указываем точность для sampler3D
 
         uniform vec2 resolution;
         uniform float time;
         uniform sampler3D voxelTexture;
+
+        out vec4 outColor;
 
         void main() {
             vec2 uv = gl_FragCoord.xy / resolution;
 
             // Простая визуализация — вычисляем цвет по координатам
             vec3 voxelPos = vec3(uv, time);
-            vec4 voxelValue = texture3D(voxelTexture, voxelPos);
+            vec4 voxelValue = texture(voxelTexture, voxelPos);
 
-            gl_FragColor = voxelValue;
+            outColor = voxelValue;
         }
     </script>
     <script src="index.js"></script>
