@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Voxel Engine</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <canvas id="voxelCanvas"></canvas>
+    <script id="vertexShader" type="x-shader/x-vertex">
+        attribute vec3 position;
+        void main() {
+            gl_Position = vec4(position, 1.0);
+        }
+    </script>
+
+    <script id="fragmentShader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        uniform vec2 resolution;
+        uniform float time;
+        uniform sampler3D voxelTexture;
+
+        void main() {
+            vec2 uv = gl_FragCoord.xy / resolution;
+
+            // Простая визуализация — вычисляем цвет по координатам
+            vec3 voxelPos = vec3(uv, time);
+            vec4 voxelValue = texture3D(voxelTexture, voxelPos);
+
+            gl_FragColor = voxelValue;
+        }
+    </script>
+    <script src="index.js"></script>
+</body>
+</html>

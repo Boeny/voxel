@@ -1,0 +1,15 @@
+{
+  "name": "voxel",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server"
+  },
+  "author": "boeny",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "http-server": "^14.1.1",
+    "three": "^0.169.0"
+  }
+}
