@@ -33,3 +33,23 @@ export function attachShaders(context, program, shaders) {
         context.attachShader(program, shader);
     })
 }
+
+export function createTexture(context, width, height) {
+    const pixelData = new Uint8Array(width * height * 4); // RGBA текстура
+
+    for (let i = 0; i < pixelData.length; i++) {
+        pixelData[i] = Math.random() * 255;
+    }
+
+    const texture = context.createTexture();
+    context.activeTexture(context.TEXTURE0);
+    context.bindTexture(context.TEXTURE_2D, texture);
+    context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, width, height, 0, context.RGBA, context.UNSIGNED_BYTE, pixelData);
+
+    context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, context.NEAREST);
+    context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAG_FILTER, context.NEAREST);
+    context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE);
+    context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE);
+
+    return texture;
+}

@@ -1,9 +1,11 @@
 import vertexShaderSrc from './shaders/vertexShader.glsl';
 import fragmentShaderSrc from './shaders/fragmentShader.glsl';
-import { compileShader, createContext, attachShaders } from './utils';
+import { compileShader, createContext, attachShaders, createTexture } from './utils';
 
-let screenWidth = window.innerWidth;
-let screenHeight = window.innerHeight
+const screenWidth = window.innerWidth;
+const screenHeight = window.innerHeight;
+const pixelSize = 10;
+
 
 const context = createContext('voxelCanvas', screenWidth, screenHeight);
 const program = context.createProgram();
@@ -24,63 +26,33 @@ const positionBuffer = context.createBuffer();
 context.bindBuffer(context.ARRAY_BUFFER, positionBuffer);
 
 // Вершины для отрисовки всей поверхности
-const positions = [
-    -1.0, -1.0, 0.0,
-     1.0, -1.0, 0.0,
-    -1.0,  1.0, 0.0,
-     1.0,  1.0, 0.0,
-];
-context.bufferData(context.ARRAY_BUFFER, new Float32Array(positions), context.STATIC_DRAW);
+const vertices = new Float32Array([
+  -1.0, -1.0,  // нижний левый
+   1.0, -1.0,  // нижний правый
+  -1.0,  1.0,  // верхний левый
+  -1.0,  1.0,  // верхний левый
+   1.0, -1.0,  // нижний правый
+   1.0,  1.0   // верхний правый
+]);
+context.bufferData(context.ARRAY_BUFFER, vertices, context.STATIC_DRAW);
 
 // Привязываем атрибуты
 const positionAttributeLocation = context.getAttribLocation(program, 'position');
 context.enableVertexAttribArray(positionAttributeLocation);
-context.vertexAttribPointer(positionAttributeLocation, 3, context.FLOAT, false, 0, 0);
-
-// Функция для создания текстуры вокселей
-function createVoxelTexture() {
-    const size = 32; // 32x32x32 вокселей
-    const data = new Uint8Array(size * size * size * 4); // RGBA текстура
-
-    for (let x = 0; x < size; x++) {
-        for (let y = 0; y < size; y++) {
-            for (let z = 0; z < size; z++) {
-                const index = (x + size * (y + size * z)) * 4;
-                data[index] = Math.random() * 255;     // R
-                data[index + 1] = Math.random() * 255; // G
-                data[index + 2] = Math.random() * 255; // B
-                data[index + 3] = 255;                 // A
-            }
-        }
-    }
-
-    const texture = context.createTexture();
-    context.bindTexture(context.TEXTURE_3D, texture);
-    context.texImage3D(context.TEXTURE_3D, 0, context.RGBA, size, size, size, 0, context.RGBA, context.UNSIGNED_BYTE, data);
-    context.texParameteri(context.TEXTURE_3D, context.TEXTURE_MIN_FILTER, context.NEAREST);
-    context.texParameteri(context.TEXTURE_3D, context.TEXTURE_MAG_FILTER, context.NEAREST);
-
-    return texture;
-}
-
-const voxelTexture = createVoxelTexture();
-
-// Привязываем текстуру к юниформу
-const voxelTextureLocation = context.getUniformLocation(program, 'voxelTexture');
-context.activeTexture(context.TEXTURE0);
-context.bindTexture(context.TEXTURE_3D, voxelTexture);
-context.uniform1i(voxelTextureLocation, 0);
-
-// Привязываем разрешение экрана
-const resolutionLocation = context.getUniformLocation(program, 'resolution');
-context.uniform2f(resolutionLocation, screenWidth, screenHeight);
+context.vertexAttribPointer(positionAttributeLocation, 2, context.FLOAT, false, 0, 0);
 
 // Анимация
 function animate(time) {
-    time *= 0.001; // Преобразуем в секунды
-    context.uniform1f(context.getUniformLocation(program, 'time'), time);
+    //time *= 0.001; // Преобразуем в секунды
+    context.viewport(0, 0, screenWidth, screenHeight);
     context.clear(context.COLOR_BUFFER_BIT);
-    context.drawArrays(context.TRIANGLE_STRIP, 0, 4);
+
+    createTexture(context, Math.floor(screenWidth / pixelSize), Math.floor(screenHeight / pixelSize));
+    context.uniform1i(context.getUniformLocation(program, 'pixelSize'), pixelSize);
+    context.uniform1i(context.getUniformLocation(program, 'pixelTexture'), 0);
+    context.uniform2f(context.getUniformLocation(program, 'resolution'), screenWidth, screenHeight);
+
+    context.drawArrays(context.TRIANGLES, 0, 6);
     requestAnimationFrame(animate);
 }
 
