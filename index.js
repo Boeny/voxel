@@ -1,3 +1,6 @@
+import vertexShaderSrc from './vertexShader.glsl';
+import fragmentShaderSrc from './fragmentShader.glsl';
+
 const canvas = document.getElementById('voxelCanvas');
 const gl = canvas.getContext('webgl2');
 
@@ -9,10 +12,6 @@ if (!gl) {
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
-// Вершинный и фрагментный шейдеры
-const vertexShaderSrc = document.getElementById('vertexShader').textContent;
-const fragmentShaderSrc = document.getElementById('fragmentShader').textContent;
 
 // Компилируем шейдеры
 function compileShader(src, type) {
@@ -41,7 +40,6 @@ if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     console.error('Error linking program:', gl.getProgramInfoLog(program));
 }
 
-// Используем программу
 gl.useProgram(program);
 
 // Создаем буфер для вершин

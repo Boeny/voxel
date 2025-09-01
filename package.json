@@ -1,15 +1,17 @@
 {
   "name": "voxel",
   "version": "0.0.1",
-  "main": "index.js",
   "scripts": {
-    "start": "http-server"
+    "start": "parcel index.html -p 8080"
   },
   "author": "boeny",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "http-server": "^14.1.1",
-    "three": "^0.169.0"
+    "three": "0.179.1"
+  },
+  "devDependencies": {
+    "@parcel/transformer-glsl": "2.15.4",
+    "parcel": "2.15.4"
   }
 }
