@@ -4,10 +4,10 @@ import { compileShader, createContext, attachShaders, createTexture } from './ut
 
 const screenWidth = window.innerWidth;
 const screenHeight = window.innerHeight;
-const pixelSize = 10;
+const pixelSize = 5;
+const CANVAS_ID = 'voxelCanvas';
 
-
-const context = createContext('voxelCanvas', screenWidth, screenHeight);
+const context = createContext(CANVAS_ID, screenWidth, screenHeight);
 const program = context.createProgram();
 
 attachShaders(context, program, [
@@ -27,12 +27,14 @@ context.bindBuffer(context.ARRAY_BUFFER, positionBuffer);
 
 // Вершины для отрисовки всей поверхности
 const vertices = new Float32Array([
-  -1.0, -1.0,  // нижний левый
-   1.0, -1.0,  // нижний правый
-  -1.0,  1.0,  // верхний левый
-  -1.0,  1.0,  // верхний левый
-   1.0, -1.0,  // нижний правый
-   1.0,  1.0   // верхний правый
+    // первый треугольник
+    -1.0, -1.0,  // нижний левый
+    1.0, -1.0,  // нижний правый
+    -1.0,  1.0,  // верхний левый
+    // второй треугольник
+    -1.0,  1.0,  // верхний левый
+    1.0, -1.0,  // нижний правый
+    1.0,  1.0   // верхний правый
 ]);
 context.bufferData(context.ARRAY_BUFFER, vertices, context.STATIC_DRAW);
 
@@ -41,16 +43,42 @@ const positionAttributeLocation = context.getAttribLocation(program, 'position')
 context.enableVertexAttribArray(positionAttributeLocation);
 context.vertexAttribPointer(positionAttributeLocation, 2, context.FLOAT, false, 0, 0);
 
-// Анимация
-function animate(time) {
-    //time *= 0.001; // Преобразуем в секунды
-    context.viewport(0, 0, screenWidth, screenHeight);
-    context.clear(context.COLOR_BUFFER_BIT);
+const width = Math.floor(screenWidth / pixelSize);
+const height = Math.floor(screenHeight / pixelSize);
 
-    createTexture(context, Math.floor(screenWidth / pixelSize), Math.floor(screenHeight / pixelSize));
-    context.uniform1i(context.getUniformLocation(program, 'pixelSize'), pixelSize);
-    context.uniform1i(context.getUniformLocation(program, 'pixelTexture'), 0);
-    context.uniform2f(context.getUniformLocation(program, 'resolution'), screenWidth, screenHeight);
+const data = new Uint8Array(width * height * 4); // RGBA текстура
+for (let i = 0; i < data.length; i++) {
+    data[i] = 255;
+}
+
+function setPixel(data, x, y, color) {
+    const index = (Math.floor(y) * width + Math.floor(x)) * 4;
+    data[index] = color[0];
+    data[index + 1] = color[1];
+    data[index + 2] = color[2];
+    data[index + 3] = 255;
+}
+
+createTexture(context, width, height, data);
+context.uniform1i(context.getUniformLocation(program, 'pixelTexture'), 0);
+context.uniform1f(context.getUniformLocation(program, 'ratio'), width / height);
+
+context.viewport(0, 0, screenWidth, screenHeight);
+context.clear(context.COLOR_BUFFER_BIT);
+
+const speed = 20;
+const freq = 5;
+let oldTime = 0;
+
+function animate(time) {
+    time = time * 0.001; // Преобразуем в секунды
+    const x = width / 2 + speed * Math.sin(time * freq);
+    setPixel(data, width / 2 + speed * Math.sin(oldTime * freq),  height/2, [255,255,255]);
+    setPixel(data, x, height/2, [0,0,0]);
+    oldTime = time;
+
+    context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, width, height, 0, context.RGBA, context.UNSIGNED_BYTE, data);
+    context.uniform1f(context.getUniformLocation(program, 'x'), x / width);
 
     context.drawArrays(context.TRIANGLES, 0, 6);
     requestAnimationFrame(animate);
