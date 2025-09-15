@@ -1,6 +1,6 @@
 import vertexShaderSrc from './shaders/vertexShader.glsl';
 import fragmentShaderSrc from './shaders/fragmentShader.glsl';
-import { compileShader, createContext, attachShaders, createTexture } from './utils';
+import { compileShader, createContext, attachShaders, createTexture, animate } from './utils';
 
 const screenWidth = window.innerWidth;
 const screenHeight = window.innerHeight;
@@ -64,14 +64,13 @@ context.uniform1i(context.getUniformLocation(program, 'pixelTexture'), 0);
 context.uniform1f(context.getUniformLocation(program, 'ratio'), width / height);
 
 context.viewport(0, 0, screenWidth, screenHeight);
-context.clear(context.COLOR_BUFFER_BIT);
+//context.clear(context.COLOR_BUFFER_BIT);
 
 const speed = 20;
 const freq = 5;
 let oldTime = 0;
 
-function animate(time) {
-    time = time * 0.001; // Преобразуем в секунды
+animate((time) => {
     const x = width / 2 + speed * Math.sin(time * freq);
     setPixel(data, width / 2 + speed * Math.sin(oldTime * freq),  height/2, [255,255,255]);
     setPixel(data, x, height/2, [0,0,0]);
@@ -81,7 +80,4 @@ function animate(time) {
     context.uniform1f(context.getUniformLocation(program, 'x'), x / width);
 
     context.drawArrays(context.TRIANGLES, 0, 6);
-    requestAnimationFrame(animate);
-}
-
-animate();
+});

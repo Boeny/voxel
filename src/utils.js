@@ -45,3 +45,8 @@ export function createTexture(context, width, height, data) {
     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE);
     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE);
 }
+
+export function animate(step, time = 0) {
+    step(time / 1000); // seconds
+    requestAnimationFrame((time) => animate(step, time));
+}
